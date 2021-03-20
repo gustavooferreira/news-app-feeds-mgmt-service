@@ -33,12 +33,12 @@ COPY --from=builder /api-server /api-server
 # Declare the port on which the webserver will be exposed.
 # As we're going to run the executable as an unprivileged user, we can't bind
 # to ports below 1024.
-EXPOSE 8000/TCP
+EXPOSE 8080/TCP
 
 USER nobody:nobody
 
 # Set env vars
 ENV NEWS_APP_FEEDS_MGMT_WEBSERVER_HOST 0.0.0.0
-ENV NEWS_APP_FEEDS_MGMT_WEBSERVER_PORT 8000
+ENV NEWS_APP_FEEDS_MGMT_WEBSERVER_PORT 8080
 
 CMD ["/api-server"]
