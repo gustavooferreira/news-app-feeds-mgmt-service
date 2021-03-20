@@ -10,7 +10,7 @@ This repository structure follows [this convention](https://github.com/golang-st
 
 To build a binary, run:
 
-```
+```bash
 make build
 ```
 
@@ -18,7 +18,7 @@ The `api-server` binary will be placed inside the `bin/` folder.
 
 To build the docker image, run:
 
-```
+```bash
 make build-docker
 ```
 
@@ -30,13 +30,13 @@ The docker image is called `news-app/feeds-api-server`.
 
 To run tests:
 
-```
+```bash
 make test
 ```
 
 To get coverage:
 
-```
+```bash
 make coverage
 ```
 
