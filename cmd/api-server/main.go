@@ -47,6 +47,7 @@ func mainLogic() int {
 	go lifecycle.TerminateHandler(logger, server)
 
 	// Listen for incoming requests -- app blocks here
+	logger.Info("listenning for incoming requests", log.Field("type", "runtime"))
 	err = server.ListenAndServe()
 	if err != nil {
 		logger.Error(fmt.Sprintf("unexpected error while serving HTTP: %s", err))

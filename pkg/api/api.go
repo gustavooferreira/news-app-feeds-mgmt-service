@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
+	"github.com/gustavooferreira/news-app-feeds-mgmt-service/pkg/api/middleware"
 	"github.com/gustavooferreira/news-app-feeds-mgmt-service/pkg/core"
 	"github.com/gustavooferreira/news-app-feeds-mgmt-service/pkg/core/log"
 )
@@ -31,6 +32,13 @@ func NewServer(addr string, port int, devMode bool, logger log.Logger, repo core
 
 	s.Router = gin.New()
 
+	s.Router.Use(
+		middleware.GinReqLogger(logger, time.RFC3339, "request served", "http-router-mux"),
+	)
+	if !devMode {
+		s.Router.Use(gin.Recovery())
+	}
+
 	// Create http.Server
 	s.HTTPServer = http.Server{
 		Addr:           fmt.Sprintf("%s:%d", addr, port),
@@ -53,8 +61,8 @@ func (s *Server) setupRoutes(devMode bool) {
 	feedsGroup := v1.Group("/feeds")
 	feedsGroup.GET("", s.GetFeeds)
 	feedsGroup.POST("", s.AddFeed)
-	feedsGroup.DELETE(":url", s.DeleteFeed)
-	feedsGroup.PUT(":url", s.SetFeedState)
+	feedsGroup.DELETE("/*url", s.DeleteFeed)
+	feedsGroup.PUT("/*url", s.SetFeedState)
 
 	// Profiler
 	// URL: https://<IP>:<PORT>/debug/pprof/

@@ -8,7 +8,7 @@ type Feed struct {
 }
 
 // Index is based on the feed URL
-type Feeds map[string]Feed
+type Feeds []Feed
 
 // Pick one of these to query
 type FeedQuery struct {

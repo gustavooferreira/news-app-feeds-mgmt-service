@@ -49,7 +49,7 @@ func (config *Configuration) LoadConfig() (err error) {
 
 	if webserverPort, ok := os.LookupEnv(AppPrefix + "_WEBSERVER_PORT"); ok {
 		config.Webserver.Port, err = strconv.Atoi(webserverPort)
-		if err != nil || config.Webserver.Port <= 0 || config.Webserver.Port > 65536 {
+		if err != nil || config.Webserver.Port <= 0 || config.Webserver.Port > 1<<16-1 {
 			return fmt.Errorf("configuration error: [webserver port] input not allowed <%s>", webserverPort)
 		}
 	}

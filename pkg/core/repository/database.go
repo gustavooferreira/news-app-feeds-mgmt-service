@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/gustavooferreira/news-app-feeds-mgmt-service/pkg/core"
@@ -15,7 +14,7 @@ type Database struct {
 // NewDatabase creates a new database manager
 // We need to return a pointer cos the struct is holding a mutex and we don't want to copy mutexes
 func NewDatabase() (*Database, error) {
-	db := Database{Feeds: make(core.Feeds)}
+	db := Database{Feeds: core.Feeds{}}
 	return &db, nil
 }
 
@@ -25,11 +24,11 @@ func (db *Database) GetFeeds(fq core.FeedQuery) (core.Feeds, error) {
 }
 
 func (db *Database) AddFeed(feed core.Feed) error {
-	if _, ok := db.Feeds[feed.URL]; ok {
-		return fmt.Errorf("feed already existes")
-	}
+	// if _, ok := db.Feeds[feed.URL]; ok {
+	// 	return fmt.Errorf("feed already existes")
+	// }
 
-	db.Feeds[feed.URL] = feed
+	// db.Feeds[feed.URL] = feed
 	return nil
 }
 

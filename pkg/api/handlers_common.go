@@ -6,12 +6,10 @@ import (
 
 func NoRoute(c *gin.Context) {
 	c.JSON(404, gin.H{"message": "no route found"})
-	c.Abort()
 }
 
 func RespondWithError(c *gin.Context, httpCode int, message string) {
 	c.JSON(httpCode, gin.H{"message": message})
-	c.Abort()
 }
 
 // Healthcheck checks health of the service.
