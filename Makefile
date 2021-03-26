@@ -43,7 +43,7 @@ coverage-report: ## Run the tests of the project and show line by line coverage 
 	@go tool cover -html=coverage.txt
 
 
-.PHONY: mockery
+.PHONY: gen-mocks
 mockery: ## Run mockery
 	@mockery --recursive --name=Repository
 

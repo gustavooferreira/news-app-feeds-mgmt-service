@@ -6,34 +6,41 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// AppLogger is the application logger.
 type AppLogger struct {
 	Level          log.Level
 	zapLogger      *zap.Logger
 	zapSugarLogger *zap.SugaredLogger
 }
 
+// NewAppLogger returns a new logger.
 func NewAppLogger(ws zapcore.WriteSyncer, logLevel log.Level) *AppLogger {
 	logger := AppLogger{}
 	logger.setupLogger(ws, logLevel)
 	return &logger
 }
 
+// Debug logs a debug message.
 func (l AppLogger) Debug(msg string, fields ...log.FieldFunc) {
 	l.logGeneric(log.DEBUG, msg, fields...)
 }
 
+// Info logs an info message.
 func (l AppLogger) Info(msg string, fields ...log.FieldFunc) {
 	l.logGeneric(log.INFO, msg, fields...)
 }
 
+// Warn logs a warning message.
 func (l AppLogger) Warn(msg string, fields ...log.FieldFunc) {
 	l.logGeneric(log.WARN, msg, fields...)
 }
 
+// Error logs an error message.
 func (l AppLogger) Error(msg string, fields ...log.FieldFunc) {
 	l.logGeneric(log.ERROR, msg, fields...)
 }
 
+// logGeneric logs a generic message.
 func (l AppLogger) logGeneric(level log.Level, msg string, fields ...log.FieldFunc) {
 	if l.zapLogger == nil {
 		return
@@ -94,6 +101,7 @@ func (l *AppLogger) setupLogger(ws zapcore.WriteSyncer, logLevel log.Level) {
 	l.setLogLevel(atom, logLevel)
 }
 
+// setLogLevel sets the log level.
 func (l *AppLogger) setLogLevel(atom zap.AtomicLevel, logLevel log.Level) {
 	if logLevel == log.DEBUG {
 		atom.SetLevel(zap.DebugLevel)
@@ -114,6 +122,7 @@ func (l *AppLogger) setLogLevel(atom zap.AtomicLevel, logLevel log.Level) {
 	}
 }
 
+// Sync syncs the logger, i.e., flushes any data in the buffer.
 func (l AppLogger) Sync() {
 	l.zapLogger.Sync()
 }

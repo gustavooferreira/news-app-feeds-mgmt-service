@@ -5,33 +5,36 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
+// Database represents the database manager connecting to the database.
 type Database struct {
 	conn *gorm.DB
 }
 
+// NewDatabase returns a new Database.
 func NewDatabase(host string, port int, username string, password string, dbname string) (*Database, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		username, password, host, port, dbname)
 
-	dbconn, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	// dbconn, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})
+	// TODO: Setup logger for gorm here
+	// I should implement GORM's logger interface on core.AppLogger and pass it to gorm config.
+	// I should also pass log level to GORM.
+
+	// dbconn, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	// dbconn = dbconn.Debug()
+	dbconn, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})
 	if err != nil {
 		return nil, err
 	}
 
-	// create session
 	dbconn = dbconn.Session(&gorm.Session{})
-	dbconn = dbconn.Debug()
-
-	// TODO: Setup logger for gorm here
-
 	db := Database{conn: dbconn}
-
 	return &db, nil
 }
 
+// Close closes all database connections.
 func (db *Database) Close() error {
 	sqlDB, err := db.conn.DB()
 	if err != nil {
@@ -41,6 +44,7 @@ func (db *Database) Close() error {
 	return sqlDB.Close()
 }
 
+// HealthCheck checks whether the database is still around.
 func (db *Database) HealthCheck() error {
 	sqlDB, err := db.conn.DB()
 	if err != nil {
@@ -55,6 +59,7 @@ func (db *Database) HealthCheck() error {
 	return nil
 }
 
+// FindAllFeedRecords finds all the feed records with possible filters for 'provider', 'category' and 'enabled'.
 func (db *Database) FindAllFeedRecords(provider string, category string, enabled bool) ([]Feed, error) {
 	var feedResults []Feed
 	chain := db.conn.Joins("Provider").Joins("Category")
@@ -72,6 +77,7 @@ func (db *Database) FindAllFeedRecords(provider string, category string, enabled
 	return feedResults, result.Error
 }
 
+// InsertFeedRecord inserts a new feed record in the database.
 func (db *Database) InsertFeedRecord(url string, provider string, category string, enabled bool) error {
 	// Add Provider if it doesn't exist
 	var providerRecord Provider
@@ -98,6 +104,7 @@ func (db *Database) InsertFeedRecord(url string, provider string, category strin
 	return result.Error
 }
 
+// UpdateFeedState updates a feed enabled field.
 func (db *Database) UpdateFeedState(url string, enabled bool) error {
 	// First check record exists
 	var feedRecord Feed
@@ -110,7 +117,8 @@ func (db *Database) UpdateFeedState(url string, enabled bool) error {
 	return result.Error
 }
 
-func (db *Database) DeleteFeedState(url string) error {
+// DeleteFeedState deletes a feed record from the database.
+func (db *Database) DeleteFeedRecord(url string) error {
 	// First check record exists
 	var feedRecord Feed
 	result := db.conn.Where(&Feed{URL: url}).Take(&feedRecord)

@@ -9,7 +9,7 @@ import (
 	"github.com/gustavooferreira/news-app-feeds-mgmt-service/pkg/core/log"
 )
 
-// NOTE: We would replace this with a proper config library like Viper
+// TODO: We would replace this with a proper config library like Viper.
 
 const AppPrefix = "NEWS_APP_FEEDS_MGMT"
 
@@ -112,6 +112,7 @@ func (config *Configuration) LoadConfig() (err error) {
 	return nil
 }
 
+// setDefaults sets the config default values.
 func (config *Configuration) setDefaults() {
 	// Webserver
 	config.Webserver.Host = "127.0.0.1"
@@ -125,6 +126,7 @@ func (config *Configuration) setDefaults() {
 	config.Database.Port = 3306
 }
 
+// ParseLogLevel parses a string and returns a log level enum.
 func ParseLogLevel(level string) (logLevel log.Level, err error) {
 	level = strings.ToLower(level)
 

@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// DBServiceError represents a generic Database Service error.
 type DBServiceError struct {
 	Msg string
 	Err error
@@ -25,18 +26,22 @@ func (e *DBServiceError) Unwrap() error {
 	return e.Err
 }
 
+// DBDUPError represents a duplicate error.
 type DBDUPError struct{}
 
 func (e *DBDUPError) Error() string { return "database error: duplicate entry" }
 
+// DBNotFoundError represents a not found operation error.
 type DBNotFoundError struct{}
 
 func (e *DBNotFoundError) Error() string { return "database error: entry not found" }
 
+// DatabaseService represents the database service.
 type DatabaseService struct {
 	Database *Database
 }
 
+// NewDatabaseService returns a new DatabaseService.
 func NewDatabaseService(host string, port int, username string, password string, dbname string) (dbs *DatabaseService, err error) {
 	dbs = &DatabaseService{}
 	dbs.Database, err = NewDatabase(host, port, username, password, dbname)
@@ -47,14 +52,17 @@ func NewDatabaseService(host string, port int, username string, password string,
 	return dbs, nil
 }
 
+// Close closes all database connections.
 func (dbs *DatabaseService) Close() error {
 	return dbs.Database.Close()
 }
 
+// HealthCheck checks whether the database is still around.
 func (dbs *DatabaseService) HealthCheck() error {
 	return dbs.Database.HealthCheck()
 }
 
+// GetFeeds returns all feed records matching a certain criteria.
 func (dbs *DatabaseService) GetFeeds(provider string, category string, enabled bool) (feeds entities.Feeds, err error) {
 	feedRecords, err := dbs.Database.FindAllFeedRecords(provider, category, enabled)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -79,6 +87,7 @@ func (dbs *DatabaseService) GetFeeds(provider string, category string, enabled b
 	return feedList, nil
 }
 
+// AddFeed adds a new feed record to the database.
 func (dbs *DatabaseService) AddFeed(feed entities.Feed) (err error) {
 	err = dbs.Database.InsertFeedRecord(feed.URL, feed.Provider, feed.Category, feed.Enabled)
 	if err != nil {
@@ -93,6 +102,7 @@ func (dbs *DatabaseService) AddFeed(feed entities.Feed) (err error) {
 	return nil
 }
 
+// SetFeedState updates a feed enabled field.
 func (dbs *DatabaseService) SetFeedState(url string, enabled bool) (err error) {
 	err = dbs.Database.UpdateFeedState(url, enabled)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -104,8 +114,9 @@ func (dbs *DatabaseService) SetFeedState(url string, enabled bool) (err error) {
 	return nil
 }
 
+// DeleteFeed deletes a feed record from the database.
 func (dbs *DatabaseService) DeleteFeed(url string) (err error) {
-	err = dbs.Database.DeleteFeedState(url)
+	err = dbs.Database.DeleteFeedRecord(url)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return &DBNotFoundError{}
 	} else if err != nil {

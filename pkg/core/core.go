@@ -4,6 +4,7 @@ import (
 	"net/url"
 )
 
+// IsValideAbsoluteURL checks if the URL provided is absolute and uses HTTP scheme.
 func IsValideAbsoluteURL(rawURL string) bool {
 	u, err := url.Parse(rawURL)
 	if err != nil {

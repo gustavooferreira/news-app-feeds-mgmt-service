@@ -46,7 +46,7 @@ func mainLogic() int {
 
 	server := api.NewServer(config.Webserver.Host, config.Webserver.Port, config.Options.DevMode, logger, db)
 
-	// Spawn SIGINT listener
+	// Spawn SIGINT/SIGTERM listener
 	go lifecycle.TerminateHandler(logger, server)
 
 	logger.Info("listenning for incoming requests", log.Field("type", "runtime"))

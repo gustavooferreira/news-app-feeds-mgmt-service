@@ -11,6 +11,7 @@ import (
 	"github.com/gustavooferreira/news-app-feeds-mgmt-service/pkg/core/repository"
 )
 
+// GetFeeds handles requests to get feeds.
 func (s *Server) GetFeeds(c *gin.Context) {
 	queryParams := struct {
 		Enabled  bool   `form:"enabled"`
@@ -36,6 +37,7 @@ func (s *Server) GetFeeds(c *gin.Context) {
 	c.JSON(200, feeds)
 }
 
+// AddFeed handles requests to add a new feed.
 func (s *Server) AddFeed(c *gin.Context) {
 	bodyData := struct {
 		URL      string `json:"url" binding:"required"`
@@ -78,6 +80,7 @@ func (s *Server) AddFeed(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// SetFeedState handles requests to change a feed enabled state.
 func (s *Server) SetFeedState(c *gin.Context) {
 	url := c.Param("url")
 	url = strings.TrimPrefix(url, "/")
@@ -115,6 +118,7 @@ func (s *Server) SetFeedState(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// DeleteFeed handles requests to delete a feed.
 func (s *Server) DeleteFeed(c *gin.Context) {
 	url := c.Param("url")
 	url = strings.TrimPrefix(url, "/")

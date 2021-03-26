@@ -53,6 +53,7 @@ func NewServer(addr string, port int, devMode bool, logger log.Logger, repo core
 	return s
 }
 
+// setupRoutes creates routes for all handlers.
 func (s *Server) setupRoutes(devMode bool) {
 	s.Router.NoRoute(NoRoute)
 	v1 := s.Router.Group("/api/v1")

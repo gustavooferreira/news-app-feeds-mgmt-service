@@ -6,6 +6,7 @@ import (
 	"github.com/gustavooferreira/news-app-feeds-mgmt-service/pkg/core/entities"
 )
 
+// Repository represents a database holding the data
 type Repository interface {
 	HealthCheck() error
 	GetFeeds(provider string, category string, enabled bool) (feeds entities.Feeds, err error)

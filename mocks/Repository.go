@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	core "github.com/gustavooferreira/news-app-feeds-mgmt-service/pkg/core"
+	entities "github.com/gustavooferreira/news-app-feeds-mgmt-service/pkg/core/entities"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -13,11 +13,11 @@ type Repository struct {
 }
 
 // AddFeed provides a mock function with given fields: feed
-func (_m *Repository) AddFeed(feed core.Feed) error {
+func (_m *Repository) AddFeed(feed entities.Feed) error {
 	ret := _m.Called(feed)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(core.Feed) error); ok {
+	if rf, ok := ret.Get(0).(func(entities.Feed) error); ok {
 		r0 = rf(feed)
 	} else {
 		r0 = ret.Error(0)
@@ -40,22 +40,22 @@ func (_m *Repository) DeleteFeed(url string) error {
 	return r0
 }
 
-// GetFeeds provides a mock function with given fields: fq
-func (_m *Repository) GetFeeds(fq core.FeedQuery) (core.Feeds, error) {
-	ret := _m.Called(fq)
+// GetFeeds provides a mock function with given fields: provider, category, enabled
+func (_m *Repository) GetFeeds(provider string, category string, enabled bool) (entities.Feeds, error) {
+	ret := _m.Called(provider, category, enabled)
 
-	var r0 core.Feeds
-	if rf, ok := ret.Get(0).(func(core.FeedQuery) core.Feeds); ok {
-		r0 = rf(fq)
+	var r0 entities.Feeds
+	if rf, ok := ret.Get(0).(func(string, string, bool) entities.Feeds); ok {
+		r0 = rf(provider, category, enabled)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(core.Feeds)
+			r0 = ret.Get(0).(entities.Feeds)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(core.FeedQuery) error); ok {
-		r1 = rf(fq)
+	if rf, ok := ret.Get(1).(func(string, string, bool) error); ok {
+		r1 = rf(provider, category, enabled)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -63,13 +63,27 @@ func (_m *Repository) GetFeeds(fq core.FeedQuery) (core.Feeds, error) {
 	return r0, r1
 }
 
-// SetFeedState provides a mock function with given fields: enabled
-func (_m *Repository) SetFeedState(enabled bool) error {
-	ret := _m.Called(enabled)
+// HealthCheck provides a mock function with given fields:
+func (_m *Repository) HealthCheck() error {
+	ret := _m.Called()
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(bool) error); ok {
-		r0 = rf(enabled)
+	if rf, ok := ret.Get(0).(func() error); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetFeedState provides a mock function with given fields: url, enabled
+func (_m *Repository) SetFeedState(url string, enabled bool) error {
+	ret := _m.Called(url, enabled)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, bool) error); ok {
+		r0 = rf(url, enabled)
 	} else {
 		r0 = ret.Error(0)
 	}
