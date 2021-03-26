@@ -64,14 +64,14 @@ func (config *Configuration) LoadConfig() (err error) {
 		}
 	}
 
-	if devMode, ok := os.LookupEnv(AppPrefix + "_DEV_MODE"); ok {
+	if devMode, ok := os.LookupEnv(AppPrefix + "_OPTIONS_DEV_MODE"); ok {
 		config.Options.DevMode, err = strconv.ParseBool(devMode)
 		if err != nil {
 			return fmt.Errorf("configuration error: [options devmode] unrecognizable boolean <%s>", devMode)
 		}
 	}
 
-	if logLevel, ok := os.LookupEnv(AppPrefix + "_LOG_LEVEL"); ok {
+	if logLevel, ok := os.LookupEnv(AppPrefix + "_OPTIONS_LOG_LEVEL"); ok {
 		config.Options.LogLevel, err = ParseLogLevel(logLevel)
 		if err != nil {
 			return fmt.Errorf("configuration error: [options loglevel] unrecognized log level")
