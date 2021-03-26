@@ -61,8 +61,8 @@ func (s *Server) setupRoutes(devMode bool) {
 	feedsGroup := v1.Group("/feeds")
 	feedsGroup.GET("", s.GetFeeds)
 	feedsGroup.POST("", s.AddFeed)
-	feedsGroup.DELETE("/*url", s.DeleteFeed)
 	feedsGroup.PUT("/*url", s.SetFeedState)
+	feedsGroup.DELETE("/*url", s.DeleteFeed)
 
 	// Profiler
 	// URL: https://<IP>:<PORT>/debug/pprof/

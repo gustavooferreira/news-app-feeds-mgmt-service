@@ -1,11 +1,16 @@
 package core
 
-import "context"
+import (
+	"context"
+
+	"github.com/gustavooferreira/news-app-feeds-mgmt-service/pkg/core/entities"
+)
 
 type Repository interface {
-	GetFeeds(fq FeedQuery) (feeds Feeds, err error)
-	AddFeed(feed Feed) (err error)
-	SetFeedState(enabled bool) (err error)
+	HealthCheck() error
+	GetFeeds(provider string, category string, enabled bool) (feeds entities.Feeds, err error)
+	AddFeed(feed entities.Feed) (err error)
+	SetFeedState(url string, enabled bool) (err error)
 	DeleteFeed(url string) (err error)
 }
 

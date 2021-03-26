@@ -17,6 +17,7 @@ const AppPrefix = "NEWS_APP_FEEDS_MGMT"
 type Configuration struct {
 	Webserver WebserverConfiguration
 	Options   OptionsConfiguration
+	Database  DatabaseConfiguration
 }
 
 // WebserverConfiguration holds configuration related to the webserver
@@ -32,6 +33,15 @@ type OptionsConfiguration struct {
 	DevMode bool
 
 	LogLevel log.Level
+}
+
+// DatabaseConfiguration holds configuration related to the database
+type DatabaseConfiguration struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
+	DBName   string
 }
 
 // NewConfig returns new default configuration
@@ -68,6 +78,37 @@ func (config *Configuration) LoadConfig() (err error) {
 		}
 	}
 
+	if dbHost, ok := os.LookupEnv(AppPrefix + "_DATABASE_HOST"); ok {
+		config.Database.Host = dbHost
+	} else {
+		return fmt.Errorf("configuration error: [database host] mandatory config parameter missing")
+	}
+
+	if dbPort, ok := os.LookupEnv(AppPrefix + "_DATABASE_PORT"); ok {
+		config.Database.Port, err = strconv.Atoi(dbPort)
+		if err != nil || config.Database.Port <= 0 || config.Database.Port > 1<<16-1 {
+			return fmt.Errorf("configuration error: [database port] input not allowed <%s>", dbPort)
+		}
+	}
+
+	if dbUsername, ok := os.LookupEnv(AppPrefix + "_DATABASE_USERNAME"); ok {
+		config.Database.Username = dbUsername
+	} else {
+		return fmt.Errorf("configuration error: [database username] mandatory config parameter missing")
+	}
+
+	if dbPassword, ok := os.LookupEnv(AppPrefix + "_DATABASE_PASSWORD"); ok {
+		config.Database.Password = dbPassword
+	} else {
+		return fmt.Errorf("configuration error: [database password] mandatory config parameter missing")
+	}
+
+	if dbName, ok := os.LookupEnv(AppPrefix + "_DATABASE_DBNAME"); ok {
+		config.Database.DBName = dbName
+	} else {
+		return fmt.Errorf("configuration error: [database dbname] mandatory config parameter missing")
+	}
+
 	return nil
 }
 
@@ -79,6 +120,9 @@ func (config *Configuration) setDefaults() {
 	// Options
 	config.Options.DevMode = false
 	config.Options.LogLevel = log.INFO
+
+	// Database
+	config.Database.Port = 3306
 }
 
 func ParseLogLevel(level string) (logLevel log.Level, err error) {

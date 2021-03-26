@@ -1,6 +1,8 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,10 +16,12 @@ func RespondWithError(c *gin.Context, httpCode int, message string) {
 
 // Healthcheck checks health of the service.
 func (s *Server) Healthcheck(c *gin.Context) {
+	err := s.Repo.HealthCheck()
+	if err != nil {
+		s.Logger.Error(fmt.Sprintf("database health check error: %s", err.Error()))
+		c.JSON(500, gin.H{"status": "FAIL"})
+		return
+	}
 
-	// TODO: ping db to make sure it's still alive!
-
-	c.JSON(200, gin.H{
-		"status": "OK",
-	})
+	c.JSON(200, gin.H{"status": "OK"})
 }

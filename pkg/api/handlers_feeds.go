@@ -2,15 +2,20 @@ package api
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gustavooferreira/news-app-feeds-mgmt-service/pkg/core"
+	"github.com/gustavooferreira/news-app-feeds-mgmt-service/pkg/core/entities"
+	"github.com/gustavooferreira/news-app-feeds-mgmt-service/pkg/core/repository"
 )
 
 func (s *Server) GetFeeds(c *gin.Context) {
 	queryParams := struct {
-		Enabled bool `form:"enabled"`
+		Enabled  bool   `form:"enabled"`
+		Provider string `form:"provider"`
+		Category string `form:"category"`
 	}{
 		Enabled: true,
 	}
@@ -21,11 +26,10 @@ func (s *Server) GetFeeds(c *gin.Context) {
 		return
 	}
 
-	// Call DB ------------------------
-	fq := core.FeedQuery{Provider: "", Category: "", Enabled: queryParams.Enabled}
-	feeds, err := s.Repo.GetFeeds(fq)
+	feeds, err := s.Repo.GetFeeds(queryParams.Provider, queryParams.Category, queryParams.Enabled)
 	if err != nil {
-		RespondWithError(c, 500, err.Error())
+		s.Logger.Error(err.Error())
+		RespondWithError(c, 500, "Internal error")
 		return
 	}
 
@@ -46,55 +50,39 @@ func (s *Server) AddFeed(c *gin.Context) {
 		return
 	}
 
-	// New to make sure URL is absolute and scheme is HTTP or HTTPS
+	// Need to make sure URL is absolute and scheme is HTTP or HTTPS
 	if !core.IsValideAbsoluteURL(bodyData.URL) {
 		s.Logger.Info("url provided is not valid")
-		RespondWithError(c, 404, "url provided is not valid")
+		RespondWithError(c, 400, "url provided is not valid")
 		return
 	}
 
-	feed := core.Feed{
+	feed := entities.Feed{
 		URL:      bodyData.URL,
 		Provider: bodyData.Provider,
 		Category: bodyData.Category,
 		Enabled:  true,
 	}
 
-	// Call DB ------------------------
-	s.Logger.Info(fmt.Sprintf("Feed: %+v", feed))
-
 	err = s.Repo.AddFeed(feed)
-	if err != nil {
-		RespondWithError(c, 500, err.Error())
+	if err, ok := err.(*repository.DBDUPError); ok {
+		s.Logger.Error(err.Error())
+		RespondWithError(c, 409, "RSS URL feed already exists in the database")
+		return
+	} else if err != nil {
+		s.Logger.Error(err.Error())
+		RespondWithError(c, 500, "Internal error")
 		return
 	}
 
-	c.JSON(200, gin.H{"status": "success"})
-}
-
-func (s *Server) DeleteFeed(c *gin.Context) {
-	// Validate this is a URL
-	url := c.Param("url")
-	url = strings.TrimPrefix(url, "/")
-
-	// New to make sure URL is absolute and scheme is HTTP or HTTPS
-	if !core.IsValideAbsoluteURL(url) {
-		s.Logger.Info("url provided is not valid")
-		RespondWithError(c, 404, "url provided is not valid")
-		return
-	}
-
-	// Call DB ------------------------
-	s.Logger.Info(fmt.Sprintf("URL : %s", url))
-
-	c.JSON(200, gin.H{"status": "success"})
+	c.Status(http.StatusNoContent)
 }
 
 func (s *Server) SetFeedState(c *gin.Context) {
 	url := c.Param("url")
 	url = strings.TrimPrefix(url, "/")
 
-	// New to make sure URL is absolute and scheme is HTTP or HTTPS
+	// Need to make sure URL is absolute and scheme is HTTP or HTTPS
 	if !core.IsValideAbsoluteURL(url) {
 		s.Logger.Info("url provided is not valid")
 		RespondWithError(c, 404, "url provided is not valid")
@@ -113,8 +101,41 @@ func (s *Server) SetFeedState(c *gin.Context) {
 		return
 	}
 
-	// Call DB ------------------------
-	s.Logger.Info(fmt.Sprintf("URL : %s - Body: %+v", url, *bodyData.Enabled))
+	err = s.Repo.SetFeedState(url, *bodyData.Enabled)
+	if err, ok := err.(*repository.DBNotFoundError); ok {
+		s.Logger.Error(err.Error())
+		RespondWithError(c, 404, "URL not found")
+		return
+	} else if err != nil {
+		s.Logger.Error(err.Error())
+		RespondWithError(c, 500, "Internal error")
+		return
+	}
 
-	c.JSON(200, gin.H{"status": "success"})
+	c.Status(http.StatusNoContent)
+}
+
+func (s *Server) DeleteFeed(c *gin.Context) {
+	url := c.Param("url")
+	url = strings.TrimPrefix(url, "/")
+
+	// Need to make sure URL is absolute and scheme is HTTP or HTTPS
+	if !core.IsValideAbsoluteURL(url) {
+		s.Logger.Info("url provided is not valid")
+		RespondWithError(c, 404, "url provided is not valid")
+		return
+	}
+
+	err := s.Repo.DeleteFeed(url)
+	if err, ok := err.(*repository.DBNotFoundError); ok {
+		s.Logger.Error(err.Error())
+		RespondWithError(c, 404, "URL not found")
+		return
+	} else if err != nil {
+		s.Logger.Error(err.Error())
+		RespondWithError(c, 500, "Internal error")
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }

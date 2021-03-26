@@ -35,18 +35,20 @@ func mainLogic() int {
 	// something like this:
 	// logger.SetLevel(config.Options.LogLevel)
 
-	db, err := repository.NewDatabase()
+	// Setup Database
+	db, err := repository.NewDatabaseService(config.Database.Host, config.Database.Port,
+		config.Database.Username, config.Database.Password, config.Database.DBName)
 	if err != nil {
-		logger.Error(err.Error(), log.Field("type", "database"))
+		logger.Error(fmt.Sprintf("database error: %s", err.Error()), log.Field("type", "setup"))
 		return 1
 	}
+	defer db.Close()
 
 	server := api.NewServer(config.Webserver.Host, config.Webserver.Port, config.Options.DevMode, logger, db)
 
 	// Spawn SIGINT listener
 	go lifecycle.TerminateHandler(logger, server)
 
-	// Listen for incoming requests -- app blocks here
 	logger.Info("listenning for incoming requests", log.Field("type", "runtime"))
 	err = server.ListenAndServe()
 	if err != nil {
