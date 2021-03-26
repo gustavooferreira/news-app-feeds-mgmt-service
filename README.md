@@ -10,6 +10,8 @@ This repository structure follows [this convention](https://github.com/golang-st
 
 > If you run `make` without any targets, it will display all options available on the makefile followed by a short description.
 
+---
+
 # Build
 
 To build a binary, run:
@@ -35,6 +37,8 @@ To get coverage:
 ```bash
 make coverage
 ```
+
+---
 
 # Docker
 
