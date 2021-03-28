@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -67,8 +66,8 @@ func (s *Server) AddFeed(c *gin.Context) {
 	}
 
 	err = s.Repo.AddFeed(feed)
-	if err, ok := err.(*repository.DBDUPError); ok {
-		s.Logger.Error(err.Error())
+	if errT, ok := err.(*repository.DBDUPError); ok {
+		s.Logger.Error(errT.Error())
 		RespondWithError(c, 409, "RSS URL feed already exists in the database")
 		return
 	} else if err != nil {
@@ -77,7 +76,7 @@ func (s *Server) AddFeed(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.Status(204)
 }
 
 // SetFeedState handles requests to change a feed enabled state.
@@ -88,7 +87,7 @@ func (s *Server) SetFeedState(c *gin.Context) {
 	// Need to make sure URL is absolute and scheme is HTTP or HTTPS
 	if !core.IsValideAbsoluteURL(url) {
 		s.Logger.Info("url provided is not valid")
-		RespondWithError(c, 404, "url provided is not valid")
+		RespondWithError(c, 400, "url provided is not valid")
 		return
 	}
 
@@ -105,8 +104,8 @@ func (s *Server) SetFeedState(c *gin.Context) {
 	}
 
 	err = s.Repo.SetFeedState(url, *bodyData.Enabled)
-	if err, ok := err.(*repository.DBNotFoundError); ok {
-		s.Logger.Error(err.Error())
+	if errT, ok := err.(*repository.DBNotFoundError); ok {
+		s.Logger.Error(errT.Error())
 		RespondWithError(c, 404, "URL not found")
 		return
 	} else if err != nil {
@@ -115,7 +114,7 @@ func (s *Server) SetFeedState(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.Status(204)
 }
 
 // DeleteFeed handles requests to delete a feed.
@@ -126,13 +125,13 @@ func (s *Server) DeleteFeed(c *gin.Context) {
 	// Need to make sure URL is absolute and scheme is HTTP or HTTPS
 	if !core.IsValideAbsoluteURL(url) {
 		s.Logger.Info("url provided is not valid")
-		RespondWithError(c, 404, "url provided is not valid")
+		RespondWithError(c, 400, "url provided is not valid")
 		return
 	}
 
 	err := s.Repo.DeleteFeed(url)
-	if err, ok := err.(*repository.DBNotFoundError); ok {
-		s.Logger.Error(err.Error())
+	if errT, ok := err.(*repository.DBNotFoundError); ok {
+		s.Logger.Error(errT.Error())
 		RespondWithError(c, 404, "URL not found")
 		return
 	} else if err != nil {
@@ -141,5 +140,5 @@ func (s *Server) DeleteFeed(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.Status(204)
 }

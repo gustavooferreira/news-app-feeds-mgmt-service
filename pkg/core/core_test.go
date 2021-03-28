@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestExtractParentURL(t *testing.T) {
+func TestIsValidAbsoluteURL(t *testing.T) {
 	tests := map[string]struct {
 		rawURL         string
 		expectedOutput bool
